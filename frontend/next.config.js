@@ -9,6 +9,13 @@ const nextConfig = {
   images: {
     domains: ['localhost'],
   },
+  output: 'standalone',
+  poweredByHeader: false,
+  compress: true,
+  generateEtags: false,
+  httpAgentOptions: {
+    keepAlive: true,
+  },
 }
 
 module.exports = nextConfig

@@ -5,6 +5,7 @@ A comprehensive AI-powered cybersecurity platform that provides real-time threat
 ## 🚀 Features
 
 ### Core Security Features
+
 - **Real-time Threat Detection**: Advanced AI algorithms monitor network traffic and system activities
 - **Vulnerability Assessment**: Automated scanning and assessment of system vulnerabilities
 - **Incident Response**: Intelligent automated response to security threats
@@ -12,12 +13,14 @@ A comprehensive AI-powered cybersecurity platform that provides real-time threat
 - **Risk Assessment**: Comprehensive security risk evaluation and reporting
 
 ### AI Capabilities
+
 - **Persistent Memory**: AI agents maintain context across sessions
 - **Adaptive Learning**: Continuous improvement through threat pattern recognition
 - **Natural Language Processing**: Intuitive security query interface
 - **Predictive Analytics**: Proactive threat identification and prevention
 
 ### Dashboard & Monitoring
+
 - **Real-time Security Dashboard**: Live monitoring of security metrics
 - **Alert Management**: Centralized security alert handling
 - **Compliance Reporting**: Automated compliance report generation
@@ -26,29 +29,34 @@ A comprehensive AI-powered cybersecurity platform that provides real-time threat
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **Next.js 14**: React-based frontend framework with App Router
 - **TypeScript**: Type-safe JavaScript development
 - **Tailwind CSS**: Utility-first CSS framework
 - **Shadcn/ui**: Modern UI component library
 
 ### Backend
+
 - **FastAPI**: High-performance Python web framework
-- **Python 3.11+**: Core backend language
+- **Python 3.13**: Core backend language
 - **Pydantic**: Data validation and serialization
 - **SQLAlchemy**: Database ORM
 
 ### Database
+
 - **PostgreSQL**: Primary relational database
 - **Redis**: Caching and session storage
 - **JSON Storage**: AI agent persistent memory
 
 ### Infrastructure
+
 - **Docker**: Containerization platform
 - **Docker Compose**: Multi-container orchestration
 - **Nginx**: Reverse proxy and load balancer
 - **SSL/TLS**: Secure communication protocols
 
 ### AI/ML Stack
+
 - **TensorFlow/PyTorch**: Machine learning frameworks
 - **scikit-learn**: Traditional ML algorithms
 - **OpenAI API**: Advanced language model integration
@@ -58,19 +66,21 @@ A comprehensive AI-powered cybersecurity platform that provides real-time threat
 
 - **Docker** and **Docker Compose** installed
 - **Node.js** 18+ and **npm/yarn**
-- **Python** 3.11+
+- **Python** 3.13
 - **PostgreSQL** 14+
 - **Git** for version control
 
 ## 🚀 Quick Start
 
 ### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/your-username/cybersentinel-ai.git
 cd cybersentinel-ai
 ```
 
 ### 2. Environment Setup
+
 ```bash
 # Copy environment template
 cp .env.example .env
@@ -80,6 +90,7 @@ nano .env
 ```
 
 ### 3. Docker Deployment (Recommended)
+
 ```bash
 # Build and start all services
 docker-compose up -d
@@ -91,11 +102,16 @@ docker-compose logs -f
 ### 4. Manual Setup (Development)
 
 #### Backend Setup
+
 ```bash
 cd backend
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
+
+# If you encounter issues with specific package versions, you may need to install them individually:
+# pip install psycopg2-binary==2.9.10  # Newer version installed due to compatibility
+# pip install pydantic==2.11.7  # Newer version installed due to Rust compilation requirements
 
 # Database setup
 alembic upgrade head
@@ -105,11 +121,43 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 #### Frontend Setup
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+
+### 5. Installed Python Packages
+
+The following Python packages have been successfully installed:
+
+#### Core Dependencies
+
+- **fastapi==0.104.1**: Web framework for API endpoints
+- **uvicorn[standard]==0.24.0**: ASGI server for running FastAPI applications
+- **sqlalchemy==2.0.23**: Database ORM for data persistence
+- **psycopg2-binary==2.9.10**: PostgreSQL database adapter (newer version installed for Python 3.13 compatibility)
+- **alembic==1.12.1**: Database migration tool
+- **pydantic==2.11.7**: Data validation and serialization (newer version installed due to Rust compilation requirements)
+- **python-jose[cryptography]==3.3.0**: JWT token handling for authentication
+- **passlib[bcrypt]==1.7.4**: Password hashing for user authentication
+- **python-multipart==0.0.6**: Handling multipart form data
+- **redis==5.0.1**: In-memory data structure store for caching
+- **openai==0.28.1**: OpenAI API client for AI capabilities
+- **qrcode[pil]==7.4.2**: QR code generation
+- **httpx==0.25.2**: HTTP client for making requests
+
+#### Development Dependencies
+
+- **pytest==7.4.3**: Testing framework
+- **pytest-asyncio==0.21.1**: Async support for pytest
+
+Note: Some packages were installed with newer versions than specified in requirements.txt due to compatibility issues with Python 3.13:
+- `psycopg2-binary==2.9.10` was installed instead of `2.9.9` due to compilation issues
+- `pydantic==2.11.7` was installed instead of `2.5.0` due to Rust compilation requirements
+
+These newer versions are backward compatible and should work correctly with the application.
 
 ## 🔧 Configuration
 
@@ -167,6 +215,7 @@ The application consists of the following services:
 ### API Endpoints
 
 #### Authentication
+
 ```bash
 POST /api/auth/login
 POST /api/auth/register
@@ -174,6 +223,7 @@ POST /api/auth/refresh
 ```
 
 #### Threat Detection
+
 ```bash
 GET /api/threats
 POST /api/threats/scan
@@ -181,6 +231,7 @@ GET /api/threats/{threat_id}
 ```
 
 #### AI Agent
+
 ```bash
 POST /api/ai/query
 GET /api/ai/memory
@@ -188,6 +239,7 @@ POST /api/ai/memory/update
 ```
 
 #### Vulnerability Assessment
+
 ```bash
 POST /api/vulnerabilities/scan
 GET /api/vulnerabilities
@@ -209,18 +261,21 @@ response = requests.post("http://localhost:8000/api/ai/query", json={
 ## 🔒 Security Features
 
 ### Authentication & Authorization
+
 - JWT-based authentication
 - Role-based access control (RBAC)
 - Multi-factor authentication (MFA)
 - Session management
 
 ### Data Protection
+
 - End-to-end encryption
 - Database encryption at rest
 - Secure API communication
 - PII data anonymization
 
 ### Compliance
+
 - SOC 2 Type II compliance
 - GDPR compliance
 - HIPAA compliance (healthcare deployments)
@@ -229,6 +284,7 @@ response = requests.post("http://localhost:8000/api/ai/query", json={
 ## 🧪 Testing
 
 ### Run Tests
+
 ```bash
 # Backend tests
 cd backend
@@ -243,6 +299,7 @@ docker-compose -f docker-compose.test.yml up --abort-on-container-exit
 ```
 
 ### Test Coverage
+
 ```bash
 # Backend coverage
 pytest --cov=app tests/
@@ -254,18 +311,21 @@ npm run test:coverage
 ## 📊 Monitoring & Logging
 
 ### Application Monitoring
+
 - Health check endpoints
 - Performance metrics
 - Error tracking
 - Resource utilization
 
 ### Security Monitoring
+
 - Real-time threat alerts
 - Audit log analysis
 - Compliance monitoring
 - Incident tracking
 
 ### Log Management
+
 ```bash
 # View application logs
 docker-compose logs -f backend
@@ -281,6 +341,7 @@ tail -f logs/security.log
 ### Production Deployment
 
 1. **Prepare Environment**
+
 ```bash
 # Set production environment
 export NODE_ENV=production
@@ -288,16 +349,19 @@ export ENVIRONMENT=production
 ```
 
 2. **Build Images**
+
 ```bash
 docker-compose -f docker-compose.prod.yml build
 ```
 
 3. **Deploy**
+
 ```bash
 docker-compose -f docker-compose.prod.yml up -d
 ```
 
 ### Scaling
+
 ```bash
 # Scale backend services
 docker-compose up -d --scale backend=3
@@ -315,6 +379,7 @@ docker-compose -f docker-compose.scale.yml up -d
 5. Open a Pull Request
 
 ### Development Guidelines
+
 - Follow PEP 8 for Python code
 - Use ESLint/Prettier for JavaScript/TypeScript
 - Write comprehensive tests
@@ -328,27 +393,32 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🆘 Support
 
 ### Documentation
+
 - [API Documentation](http://localhost:8000/docs)
 - [User Guide](./docs/user-guide.md)
 - [Developer Guide](./docs/developer-guide.md)
 
 ### Community
+
 - [GitHub Issues](https://github.com/your-username/cybersentinel-ai/issues)
 - [Discussions](https://github.com/your-username/cybersentinel-ai/discussions)
 - [Discord Community](https://discord.gg/cybersentinel)
 
 ### Commercial Support
+
 For enterprise support and custom implementations, contact: support@cybersentinel.ai
 
 ## 🗺️ Roadmap
 
 ### Version 2.0
+
 - [ ] Advanced ML model integration
 - [ ] Multi-tenant architecture
 - [ ] Mobile application
 - [ ] Advanced threat hunting
 
 ### Version 2.1
+
 - [ ] Kubernetes deployment
 - [ ] Advanced analytics dashboard
 - [ ] Third-party integrations

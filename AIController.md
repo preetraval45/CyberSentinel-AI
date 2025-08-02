@@ -197,11 +197,13 @@ if __name__ == "__main__":
 ## Key Features
 
 ### Persistent Storage
+
 - JSON-based memory storage for cross-session persistence
 - Automatic file creation and directory management
 - Error handling for corrupted or missing files
 
 ### Memory Management
+
 - **Context Storage**: Current task and environment state
 - **Conversation History**: Recent user interactions (limited to 100 entries)
 - **Pattern Learning**: Security patterns and threat indicators
@@ -211,12 +213,14 @@ if __name__ == "__main__":
 ### Core Functions
 
 #### Memory Operations
+
 - `_load_memory()`: Load state from JSON file
 - `save_memory()`: Persist current state to disk
 - `reset_memory()`: Clear memory with optional data retention
 - `export_memory()`: Backup memory to specified location
 
 #### State Management
+
 - `update_context()`: Update current context information
 - `add_conversation()`: Store user-AI interactions
 - `learn_pattern()`: Record new security patterns
@@ -224,6 +228,7 @@ if __name__ == "__main__":
 - `set_user_preference()`: Store user preferences
 
 #### Data Retrieval
+
 - `get_context()`: Retrieve context information
 - `get_conversation_history()`: Get recent conversations
 - `get_learned_patterns()`: Access learned security patterns
@@ -231,6 +236,7 @@ if __name__ == "__main__":
 - `resume_session()`: Restore previous session state
 
 #### Analytics
+
 - `get_memory_stats()`: Memory usage and statistics
 - Automatic timestamp tracking for all updates
 - Version control for memory format compatibility
@@ -255,5 +261,30 @@ ai.learn_pattern("intrusion_attempt", {
 # Session continuity
 session_data = ai.resume_session("user_123_session")
 ```
+
+## Dependencies
+
+The AI Controller requires the following Python packages to be installed:
+
+### Core Dependencies
+
+- **fastapi==0.104.1**: Web framework for API endpoints
+- **uvicorn[standard]==0.24.0**: ASGI server for running FastAPI applications
+- **sqlalchemy==2.0.23**: Database ORM for data persistence
+- **psycopg2-binary==2.9.10**: PostgreSQL database adapter (newer version installed)
+- **alembic==1.12.1**: Database migration tool
+- **pydantic==2.11.7**: Data validation and serialization (newer version installed)
+- **python-jose[cryptography]==3.3.0**: JWT token handling for authentication
+- **passlib[bcrypt]==1.7.4**: Password hashing for user authentication
+- **python-multipart==0.0.6**: Handling multipart form data
+- **redis==5.0.1**: In-memory data structure store for caching
+- **openai==0.28.1**: OpenAI API client for AI capabilities
+- **qrcode[pil]==7.4.2**: QR code generation
+- **httpx==0.25.2**: HTTP client for making requests
+
+### Development Dependencies
+
+- **pytest==7.4.3**: Testing framework
+- **pytest-asyncio==0.21.1**: Async support for pytest
 
 This implementation provides a lightweight, efficient persistent memory system for AI agents in cybersecurity applications, ensuring continuity across sessions while maintaining performance and data integrity.

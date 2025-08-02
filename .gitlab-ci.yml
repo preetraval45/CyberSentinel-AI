@@ -1,0 +1,209 @@
+stages:
+  - lint
+  - test
+  - security
+  - build
+  - deploy
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: "/certs"
+  REGISTRY: $CI_REGISTRY
+  IMAGE_TAG: $CI_COMMIT_SHA
+
+# Lint Jobs
+lint:frontend:
+  stage: lint
+  image: node:18-alpine
+  cache:
+    paths:
+      - frontend/node_modules/
+  before_script:
+    - cd frontend
+    - npm ci
+  script:
+    - npm run lint
+    - npm run type-check
+  only:
+    - merge_requests
+    - main
+    - develop
+
+lint:backend:
+  stage: lint
+  image: python:3.11-slim
+  cache:
+    paths:
+      - backend/.pip-cache/
+  before_script:
+    - cd backend
+    - pip install --cache-dir .pip-cache -r requirements.txt
+    - pip install flake8 black isort
+  script:
+    - flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+    - black --check .
+    - isort --check-only .
+  only:
+    - merge_requests
+    - main
+    - develop
+
+# Test Jobs
+test:frontend:
+  stage: test
+  image: node:18-alpine
+  cache:
+    paths:
+      - frontend/node_modules/
+  before_script:
+    - cd frontend
+    - npm ci
+  script:
+    - npm test -- --coverage --watchAll=false
+  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: frontend/coverage/cobertura-coverage.xml
+  only:
+    - merge_requests
+    - main
+    - develop
+
+test:backend:
+  stage: test
+  image: python:3.11-slim
+  services:
+    - postgres:15-alpine
+    - redis:7-alpine
+  variables:
+    POSTGRES_DB: test_cybersentinel
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: test_password
+    DATABASE_URL: postgresql://postgres:test_password@postgres:5432/test_cybersentinel
+    REDIS_URL: redis://redis:6379
+  cache:
+    paths:
+      - backend/.pip-cache/
+  before_script:
+    - cd backend
+    - pip install --cache-dir .pip-cache -r requirements.txt
+    - pip install pytest-cov
+  script:
+    - pytest tests/ -v --cov=. --cov-report=xml --cov-report=term
+  coverage: '/TOTAL.+?(\d+\%)$/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: backend/coverage.xml
+  only:
+    - merge_requests
+    - main
+    - develop
+
+# Security Scanning
+security:scan:
+  stage: security
+  image: aquasec/trivy:latest
+  script:
+    - trivy fs --format json --output trivy-report.json .
+    - trivy fs --format table .
+  artifacts:
+    reports:
+      container_scanning: trivy-report.json
+  only:
+    - merge_requests
+    - main
+
+# Build Jobs
+build:frontend:
+  stage: build
+  image: docker:24-dind
+  services:
+    - docker:24-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $REGISTRY/$CI_PROJECT_PATH/frontend:$IMAGE_TAG ./frontend
+    - docker push $REGISTRY/$CI_PROJECT_PATH/frontend:$IMAGE_TAG
+    - docker tag $REGISTRY/$CI_PROJECT_PATH/frontend:$IMAGE_TAG $REGISTRY/$CI_PROJECT_PATH/frontend:latest
+    - docker push $REGISTRY/$CI_PROJECT_PATH/frontend:latest
+  only:
+    - main
+
+build:backend:
+  stage: build
+  image: docker:24-dind
+  services:
+    - docker:24-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $REGISTRY/$CI_PROJECT_PATH/backend:$IMAGE_TAG ./backend
+    - docker push $REGISTRY/$CI_PROJECT_PATH/backend:$IMAGE_TAG
+    - docker tag $REGISTRY/$CI_PROJECT_PATH/backend:$IMAGE_TAG $REGISTRY/$CI_PROJECT_PATH/backend:latest
+    - docker push $REGISTRY/$CI_PROJECT_PATH/backend:latest
+  only:
+    - main
+
+build:database:
+  stage: build
+  image: docker:24-dind
+  services:
+    - docker:24-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $REGISTRY/$CI_PROJECT_PATH/database:$IMAGE_TAG ./database
+    - docker push $REGISTRY/$CI_PROJECT_PATH/database:$IMAGE_TAG
+    - docker tag $REGISTRY/$CI_PROJECT_PATH/database:$IMAGE_TAG $REGISTRY/$CI_PROJECT_PATH/database:latest
+    - docker push $REGISTRY/$CI_PROJECT_PATH/database:latest
+  only:
+    - main
+
+build:nginx:
+  stage: build
+  image: docker:24-dind
+  services:
+    - docker:24-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $REGISTRY/$CI_PROJECT_PATH/nginx:$IMAGE_TAG ./docker/nginx
+    - docker push $REGISTRY/$CI_PROJECT_PATH/nginx:$IMAGE_TAG
+    - docker tag $REGISTRY/$CI_PROJECT_PATH/nginx:$IMAGE_TAG $REGISTRY/$CI_PROJECT_PATH/nginx:latest
+    - docker push $REGISTRY/$CI_PROJECT_PATH/nginx:latest
+  only:
+    - main
+
+# Deploy Job
+deploy:production:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client curl
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan $PROD_HOST >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  script:
+    - |
+      ssh $PROD_USER@$PROD_HOST << 'EOF'
+        cd /opt/cybersentinel-ai
+        git pull origin main
+        docker-compose pull
+        docker-compose up -d --remove-orphans
+        docker system prune -f
+      EOF
+    - sleep 60
+    - curl -f https://cybersentinel.ai/health || exit 1
+  environment:
+    name: production
+    url: https://cybersentinel.ai
+  only:
+    - main
+  when: manual
