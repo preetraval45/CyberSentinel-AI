@@ -1,5 +1,5 @@
 # Multi-stage build for production optimization
-FROM python:3.13-slim AS builder
+FROM python:3.13-slim-bookworm AS builder
 
 WORKDIR /app
 
@@ -16,7 +16,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
 
 # Production stage
-FROM python:3.13-slim AS production
+FROM python:3.13-slim-bookworm AS production
 
 WORKDIR /app
 
