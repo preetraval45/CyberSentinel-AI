@@ -1,16 +1,25 @@
 'use client'
 
-import { useRef, useMemo } from 'react'
+import { useRef, useMemo, Suspense } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Points, PointMaterial } from '@react-three/drei'
 import * as THREE from 'three'
+
+// Optimized particle count based on device capability
+const getParticleCount = () => {
+  if (typeof window === 'undefined') return 200;
+  const isLowEnd = navigator.hardwareConcurrency <= 4;
+  const isMobile = window.innerWidth < 768;
+  return isLowEnd || isMobile ? 200 : 1000;
+};
 
 export default function FloatingParticles() {
   const ref = useRef<THREE.Points>(null)
   
   const particles = useMemo(() => {
-    const temp = new Float32Array(1000 * 3)
-    for (let i = 0; i < 1000; i++) {
+    const count = getParticleCount();
+    const temp = new Float32Array(count * 3)
+    for (let i = 0; i < count; i++) {
       temp.set([
         (Math.random() - 0.5) * 10,
         (Math.random() - 0.5) * 10,
@@ -28,15 +37,17 @@ export default function FloatingParticles() {
   })
 
   return (
-    <Points ref={ref} positions={particles} stride={3} frustumCulled={false}>
-      <PointMaterial
-        transparent
-        color="#3b82f6"
-        size={0.02}
-        sizeAttenuation={true}
-        depthWrite={false}
-        opacity={0.6}
-      />
-    </Points>
+    <Suspense fallback={null}>
+      <Points ref={ref} positions={particles} stride={3} frustumCulled>
+        <PointMaterial
+          transparent
+          color="#3b82f6"
+          size={0.02}
+          sizeAttenuation={true}
+          depthWrite={false}
+          opacity={0.6}
+        />
+      </Points>
+    </Suspense>
   )
 }

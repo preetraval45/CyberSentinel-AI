@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense } from 'react'
+import { Suspense, useMemo } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, Environment } from '@react-three/drei'
 
@@ -11,12 +11,35 @@ interface Scene3DProps {
 }
 
 export default function Scene3D({ children, enableControls = false, className = "w-full h-full" }: Scene3DProps) {
+  const canvasConfig = useMemo(() => {
+    if (typeof window === 'undefined') {
+      return {
+        gl: { antialias: false, alpha: true, powerPreference: "default" as const },
+        dpr: [1, 1] as [number, number]
+      };
+    }
+    
+    const isLowEnd = navigator.hardwareConcurrency <= 4;
+    const isMobile = window.innerWidth < 768;
+    
+    return {
+      gl: { 
+        antialias: !isLowEnd && !isMobile, 
+        alpha: true,
+        powerPreference: isLowEnd ? "default" as const : "high-performance" as const
+      },
+      dpr: isLowEnd || isMobile ? [1, 1] as [number, number] : [1, 2] as [number, number]
+    };
+  }, []);
+
   return (
     <div className={className}>
       <Canvas
         camera={{ position: [0, 0, 5], fov: 45 }}
-        gl={{ antialias: true, alpha: true }}
-        dpr={[1, 2]}
+        gl={canvasConfig.gl}
+        dpr={canvasConfig.dpr}
+        performance={{ min: 0.5 }}
+        frameloop="demand"
       >
         <Suspense fallback={null}>
           <Environment preset="night" />

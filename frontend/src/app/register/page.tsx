@@ -5,23 +5,27 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { Shield, Mail, Lock, Eye, EyeOff, UserPlus } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { registerSchema, RegisterFormData } from '@/lib/validations'
 import { slideUp, buttonHover, inputFocus, staggerContainer } from '@/lib/animations'
 import PageTransition from '@/components/ui/PageTransition'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import AnimationModal from '@/components/animations/AnimationModal'
 import dynamic from 'next/dynamic'
 
 const Scene3D = dynamic(() => import('@/components/3d/Scene3D'), { ssr: false })
 const SecurityShield = dynamic(() => import('@/components/3d/SecurityShield'), { ssr: false })
 
 export default function Register() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
-  const { register, user, loading } = useAuth()
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const { register: registerUser, user, loading } = useAuth()
   const router = useRouter()
+  
+  const { register, handleSubmit, formState: { errors, isSubmitting }, setError } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema)
+  })
 
   useEffect(() => {
     if (!loading && user) {
@@ -29,28 +33,20 @@ export default function Register() {
     }
   }, [user, loading, router])
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match')
-      return
+  const onSubmit = async (data: RegisterFormData) => {
+    try {
+      const success = await registerUser(data.email, data.password)
+      if (success) {
+        setShowSuccessModal(true)
+        setTimeout(() => {
+          router.push('/dashboard')
+        }, 2000)
+      } else {
+        setError('root', { message: 'Registration failed. Please try again.' })
+      }
+    } catch (error) {
+      setError('root', { message: 'Registration failed. Please try again.' })
     }
-
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters long')
-      return
-    }
-
-    setIsLoading(true)
-    const success = await register(email, password)
-    if (success) {
-      router.push('/dashboard')
-    } else {
-      setError('Registration failed. Please try again.')
-    }
-    setIsLoading(false)
   }
 
   return (
@@ -94,7 +90,7 @@ export default function Register() {
             </motion.div>
             
             <motion.form 
-              onSubmit={handleRegister} 
+              onSubmit={handleSubmit(onSubmit)} 
               className="space-y-6"
               variants={staggerContainer}
               initial="initial"
@@ -107,13 +103,20 @@ export default function Register() {
                 </label>
                 <motion.input
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="glass-input w-full"
+                  {...register('email')}
+                  className={`glass-input w-full ${errors.email ? 'border-red-500' : ''}`}
                   placeholder="Enter your email"
-                  required
                   {...inputFocus}
                 />
+                {errors.email && (
+                  <motion.p 
+                    className="text-red-400 text-sm mt-1"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    {errors.email.message}
+                  </motion.p>
+                )}
               </motion.div>
               
               <motion.div variants={slideUp}>
@@ -124,11 +127,9 @@ export default function Register() {
                 <div className="relative">
                   <motion.input
                     type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="glass-input w-full pr-12"
+                    {...register('password')}
+                    className={`glass-input w-full pr-12 ${errors.password ? 'border-red-500' : ''}`}
                     placeholder="Enter your password"
-                    required
                     {...inputFocus}
                   />
                   <motion.button
@@ -141,6 +142,15 @@ export default function Register() {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </motion.button>
                 </div>
+                {errors.password && (
+                  <motion.p 
+                    className="text-red-400 text-sm mt-1"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    {errors.password.message}
+                  </motion.p>
+                )}
               </motion.div>
               
               <motion.div variants={slideUp}>
@@ -150,39 +160,46 @@ export default function Register() {
                 </label>
                 <motion.input
                   type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="glass-input w-full"
+                  {...register('confirmPassword')}
+                  className={`glass-input w-full ${errors.confirmPassword ? 'border-red-500' : ''}`}
                   placeholder="Confirm your password"
-                  required
                   {...inputFocus}
                 />
+                {errors.confirmPassword && (
+                  <motion.p 
+                    className="text-red-400 text-sm mt-1"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    {errors.confirmPassword.message}
+                  </motion.p>
+                )}
               </motion.div>
               
-              {error && (
+              {errors.root && (
                 <motion.div 
                   className="text-red-400 text-sm text-center bg-red-500/10 border border-red-500/20 rounded-lg p-3"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ type: 'spring', stiffness: 300 }}
                 >
-                  {error}
+                  {errors.root.message}
                 </motion.div>
               )}
               
               <motion.button
                 type="submit"
-                disabled={isLoading}
+                disabled={isSubmitting}
                 className="neon-button w-full flex items-center justify-center space-x-2 disabled:opacity-50"
                 {...buttonHover}
                 variants={slideUp}
               >
-                {isLoading ? (
+                {isSubmitting ? (
                   <LoadingSpinner size="sm" color="text-white" />
                 ) : (
                   <UserPlus className="w-4 h-4" />
                 )}
-                <span>{isLoading ? 'CREATING ACCOUNT...' : 'SIGN UP'}</span>
+                <span>{isSubmitting ? 'CREATING ACCOUNT...' : 'SIGN UP'}</span>
               </motion.button>
               
               <motion.div className="text-center" variants={slideUp}>
@@ -201,6 +218,16 @@ export default function Register() {
           </div>
         </motion.div>
       </div>
+      
+      <AnimationModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        type="success"
+        title="Account Created!"
+        message="Welcome to CyberSentinel AI"
+        autoClose={true}
+        duration={1500}
+      />
     </PageTransition>
   )
 }

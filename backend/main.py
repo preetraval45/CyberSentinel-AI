@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import auth, threats, ai, vulnerabilities, phishing, chat, simulation, training, admin, ai_workflow, voice_calls, ransomware, team_simulation, red_blue_team, user_profile, behavior_analysis, sentinelbot, billing, sso, docs, notifications, protected_examples
+from routes import auth, threats, ai, vulnerabilities, phishing, chat, simulation, training, admin, ai_workflow, voice_calls, ransomware, team_simulation, red_blue_team, user_profile, behavior_analysis, sentinelbot, billing, sso, docs, notifications, protected_examples, admin_api, user_api, limited_user_api
 from config.database import engine, Base
 from middleware.security import SecurityHeadersMiddleware, InputSanitizationMiddleware, RateLimitMiddleware
 import time
@@ -50,6 +50,9 @@ app.include_router(sso.router)
 app.include_router(docs.router)
 app.include_router(notifications.router)
 app.include_router(protected_examples.router, prefix="/api/protected", tags=["protected"])
+app.include_router(admin_api.router, prefix="/api/admin", tags=["admin"])
+app.include_router(user_api.router, prefix="/api/user", tags=["user"])
+app.include_router(limited_user_api.router, prefix="/api/limited", tags=["limited"])
 
 @app.get("/health")
 def health_check():

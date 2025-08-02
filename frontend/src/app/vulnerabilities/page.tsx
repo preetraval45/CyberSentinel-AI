@@ -1,86 +1,112 @@
-export default function Vulnerabilities() {
-  const vulnerabilities = [
-    { id: 1, name: 'SQL Injection', severity: 'Critical', affected: 'Web App', cvss: '9.8' },
-    { id: 2, name: 'XSS Vulnerability', severity: 'High', affected: 'Frontend', cvss: '7.5' },
-    { id: 3, name: 'Outdated Dependencies', severity: 'Medium', affected: 'Backend', cvss: '5.3' },
-  ]
+'use client'
+
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { Search, AlertCircle, CheckCircle } from 'lucide-react'
+import PageTransition from '@/components/ui/PageTransition'
+import { PageSkeleton } from '@/components/ui/LoadingSkeleton'
+import { useAuth } from '@/contexts/AuthContext'
+import { staggerContainer, slideUp } from '@/lib/animations'
+
+export default function VulnerabilitiesPage() {
+  const { user, loading } = useAuth()
+  const [isLoading, setIsLoading] = useState(true)
+  const [vulnerabilities, setVulnerabilities] = useState([])
+
+  useEffect(() => {
+    if (!loading) {
+      setTimeout(() => {
+        setVulnerabilities([
+          { id: 1, title: 'Outdated SSL Certificate', severity: 'Medium', status: 'Open' },
+          { id: 2, title: 'Weak Password Policy', severity: 'High', status: 'Fixed' },
+          { id: 3, title: 'Unpatched Software', severity: 'Critical', status: 'Open' }
+        ])
+        setIsLoading(false)
+      }, 800)
+    }
+  }, [loading])
+
+  if (loading || isLoading) {
+    return <PageSkeleton />
+  }
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Vulnerability Assessment</h1>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-            Run Assessment
-          </button>
-        </div>
+    <PageTransition>
+      <div className="min-h-screen pt-20 pb-12 px-4 relative overflow-hidden">
+        <div className="absolute inset-0 dark-grid opacity-10" />
+        
+        <div className="relative z-10 max-w-6xl mx-auto">
+          <motion.h1 
+            className="text-4xl font-bold glow-text mb-8"
+            initial={{ opacity: 0, y: -30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            Vulnerability Assessment
+          </motion.h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-900">Critical</h3>
-            <p className="text-3xl font-bold text-red-600 mt-2">1</p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-900">High</h3>
-            <p className="text-3xl font-bold text-orange-600 mt-2">1</p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-900">Medium</h3>
-            <p className="text-3xl font-bold text-yellow-600 mt-2">1</p>
-          </div>
-        </div>
+          <motion.div
+            className="glass-card p-6 mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-semibold text-gray-100">Scan Results</h2>
+              <motion.button
+                className="neon-button flex items-center space-x-2"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Search className="w-4 h-4" />
+                <span>New Scan</span>
+              </motion.button>
+            </div>
 
-        <div className="bg-white shadow rounded-lg overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Vulnerability
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Severity
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Affected Component
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  CVSS Score
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {vulnerabilities.map((vuln) => (
-                <tr key={vuln.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {vuln.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      vuln.severity === 'Critical' ? 'bg-red-100 text-red-800' :
-                      vuln.severity === 'High' ? 'bg-orange-100 text-orange-800' :
-                      'bg-yellow-100 text-yellow-800'
+            <motion.div
+              className="space-y-4"
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+            >
+              {vulnerabilities.map((vuln: any, index) => (
+                <motion.div
+                  key={vuln.id}
+                  className="flex items-center justify-between p-4 bg-gray-800/30 rounded-lg border border-gray-700/50"
+                  variants={slideUp}
+                >
+                  <div className="flex items-center space-x-3">
+                    {vuln.status === 'Fixed' ? (
+                      <CheckCircle className="w-5 h-5 text-green-400" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5 text-red-400" />
+                    )}
+                    <div>
+                      <h3 className="font-semibold text-gray-100">{vuln.title}</h3>
+                      <p className="text-sm text-gray-400">Vulnerability #{vuln.id}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                      vuln.severity === 'Critical' ? 'bg-red-500/20 text-red-400' :
+                      vuln.severity === 'High' ? 'bg-orange-500/20 text-orange-400' :
+                      'bg-yellow-500/20 text-yellow-400'
                     }`}>
                       {vuln.severity}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {vuln.affected}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {vuln.cvss}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-900">Fix</button>
-                  </td>
-                </tr>
+                    <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                      vuln.status === 'Fixed' ? 'bg-green-500/20 text-green-400' :
+                      'bg-red-500/20 text-red-400'
+                    }`}>
+                      {vuln.status}
+                    </span>
+                  </div>
+                </motion.div>
               ))}
-            </tbody>
-          </table>
+            </motion.div>
+          </motion.div>
         </div>
       </div>
-    </div>
+    </PageTransition>
   )
 }

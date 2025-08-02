@@ -5,22 +5,26 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { Shield, Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { loginSchema, LoginFormData } from '@/lib/validations'
 import { pageVariants, slideUp, buttonHover, inputFocus } from '@/lib/animations'
 import PageTransition from '@/components/ui/PageTransition'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
-import dynamic from 'next/dynamic'
 
-const Scene3D = dynamic(() => import('@/components/3d/Scene3D'), { ssr: false })
-const CyberBrain = dynamic(() => import('@/components/3d/CyberBrain'), { ssr: false })
+import { LazyCyberBrain, LazyAnimationModal, useViewportOptimization } from '@/components/lazy/LazyComponents'
+import Scene3D from '@/components/3d/Scene3D'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
   const { login, user, loading } = useAuth()
   const router = useRouter()
+  const { shouldRender3D } = useViewportOptimization()
+  
+  const { register, handleSubmit, formState: { errors, isSubmitting }, setError } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema)
+  })
 
   useEffect(() => {
     if (!loading && user) {
@@ -28,66 +32,67 @@ export default function LoginPage() {
     }
   }, [user, loading, router])
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError('')
-
-    const success = await login(email, password)
-    if (success) {
-      router.push('/dashboard')
-    } else {
-      setError('Invalid email or password')
+  const onSubmit = async (data: LoginFormData) => {
+    try {
+      const success = await login(data.email, data.password)
+      if (success) {
+        setShowSuccessModal(true)
+        setTimeout(() => {
+          router.push('/dashboard')
+        }, 2000)
+      } else {
+        setError('root', { message: 'Invalid email or password' })
+      }
+    } catch (error) {
+      setError('root', { message: 'Login failed. Please try again.' })
     }
-    
-    setIsLoading(false)
   }
 
 
 
   return (
     <PageTransition>
-      <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
+      <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         <div className="absolute inset-0 dark-grid opacity-20" />
         
         <motion.div 
-          className="relative z-10 w-full max-w-md"
+          className="relative z-10 w-full max-w-sm sm:max-w-md"
           variants={slideUp}
           initial="initial"
           animate="animate"
           transition={{ duration: 0.6, ease: 'easeOut' }}
         >
-          <div className="glass-card p-8">
+          <div className="glass-card p-6 sm:p-8">
             <motion.div 
-              className="text-center mb-8"
+              className="text-center mb-6 sm:mb-8"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
             >
               <motion.div 
-                className="w-24 h-24 mx-auto mb-4 relative"
+                className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 mx-auto mb-4 relative"
                 whileHover={{ scale: 1.1 }}
                 transition={{ type: 'spring', stiffness: 300 }}
               >
-                <Suspense fallback={
-                  <div className="w-full h-full border-2 border-blue-500/50 rounded-full flex items-center justify-center bg-blue-500/10">
-                    <Shield className="w-8 h-8 text-blue-400" />
-                  </div>
-                }>
+{shouldRender3D ? (
                   <Scene3D className="w-full h-full">
-                    <CyberBrain />
+                    <LazyCyberBrain />
                   </Scene3D>
-                </Suspense>
+                ) : (
+                  <div className="w-full h-full border-2 border-blue-500/50 rounded-full flex items-center justify-center bg-blue-500/10">
+                    <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-blue-400" />
+                  </div>
+                )}
               </motion.div>
-              <h1 className="text-3xl font-bold glow-text mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold glow-text mb-2">
                 CyberSentinel Login
               </h1>
-              <p className="text-gray-400">Secure access to your dashboard</p>
+              <p className="text-sm sm:text-base text-gray-400">Secure access to your dashboard</p>
             </motion.div>
 
             <motion.form 
-              onSubmit={handleLogin} 
-              className="space-y-6"
+              onSubmit={handleSubmit(onSubmit)} 
+              className="space-y-4 sm:space-y-6"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.5 }}
@@ -97,20 +102,27 @@ export default function LoginPage() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5, duration: 0.4 }}
               >
-                <label className="flex items-center space-x-2 text-gray-300 text-sm mb-2">
-                  <Mail className="w-4 h-4" />
+                <label className="flex items-center space-x-2 text-gray-300 text-xs sm:text-sm mb-2">
+                  <Mail className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span>Email Address</span>
                 </label>
                 <motion.input
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="glass-input w-full"
+                  {...register('email')}
+                  className={`glass-input w-full text-sm sm:text-base ${errors.email ? 'border-red-500' : ''}`}
                   placeholder="Enter your email"
-                  required
                   {...inputFocus}
                   transition={{ type: 'spring', stiffness: 300 }}
                 />
+                {errors.email && (
+                  <motion.p 
+                    className="text-red-400 text-sm mt-1"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    {errors.email.message}
+                  </motion.p>
+                )}
               </motion.div>
 
               <motion.div
@@ -125,11 +137,9 @@ export default function LoginPage() {
                 <div className="relative">
                   <motion.input
                     type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="glass-input w-full pr-12"
+                    {...register('password')}
+                    className={`glass-input w-full pr-12 ${errors.password ? 'border-red-500' : ''}`}
                     placeholder="Enter your password"
-                    required
                     {...inputFocus}
                     transition={{ type: 'spring', stiffness: 300 }}
                   />
@@ -143,22 +153,31 @@ export default function LoginPage() {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </motion.button>
                 </div>
+                {errors.password && (
+                  <motion.p 
+                    className="text-red-400 text-sm mt-1"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    {errors.password.message}
+                  </motion.p>
+                )}
               </motion.div>
 
-              {error && (
+              {errors.root && (
                 <motion.div 
                   className="text-red-400 text-sm text-center bg-red-500/10 border border-red-500/20 rounded-lg p-3"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ type: 'spring', stiffness: 300 }}
                 >
-                  {error}
+                  {errors.root.message}
                 </motion.div>
               )}
 
               <motion.button
                 type="submit"
-                disabled={isLoading}
+                disabled={isSubmitting}
                 className="neon-button w-full flex items-center justify-center space-x-2 disabled:opacity-50"
                 {...buttonHover}
                 transition={{ type: 'spring', stiffness: 300 }}
@@ -166,12 +185,12 @@ export default function LoginPage() {
                 animate={{ opacity: 1, y: 0 }}
                 whileDisabled={{ scale: 1 }}
               >
-                {isLoading ? (
+                {isSubmitting ? (
                   <LoadingSpinner size="sm" color="text-white" />
                 ) : (
                   <LogIn className="w-4 h-4" />
                 )}
-                <span>{isLoading ? 'AUTHENTICATING...' : 'LOGIN'}</span>
+                <span>{isSubmitting ? 'AUTHENTICATING...' : 'LOGIN'}</span>
               </motion.button>
             </motion.form>
 
@@ -195,6 +214,16 @@ export default function LoginPage() {
           </div>
         </motion.div>
       </div>
+      
+      <LazyAnimationModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        type="success"
+        title="Login Successful!"
+        message="Welcome back to CyberSentinel AI"
+        autoClose={true}
+        duration={1500}
+      />
     </PageTransition>
   )
 }

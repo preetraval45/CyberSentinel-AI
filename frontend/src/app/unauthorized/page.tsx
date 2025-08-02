@@ -1,22 +1,38 @@
 'use client'
 
+import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { scaleIn, buttonHover } from '@/lib/animations'
 import PageTransition from '@/components/ui/PageTransition'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
 export default function UnauthorizedPage() {
   const { user, logout } = useAuth()
   const router = useRouter()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [isNavigating, setIsNavigating] = useState(false)
 
-  const handleGoBack = () => {
-    router.push('/dashboard')
+  const handleGoBack = async () => {
+    setIsNavigating(true)
+    try {
+      router.push('/dashboard')
+    } finally {
+      setTimeout(() => setIsNavigating(false), 1000)
+    }
   }
 
   const handleLogout = async () => {
-    await logout()
-    router.push('/login')
+    setIsLoggingOut(true)
+    try {
+      await logout()
+      router.push('/login')
+    } catch (error) {
+      console.error('Logout failed:', error)
+    } finally {
+      setIsLoggingOut(false)
+    }
   }
 
   return (
@@ -79,18 +95,22 @@ export default function UnauthorizedPage() {
             >
               <motion.button
                 onClick={handleGoBack}
-                className="neon-button w-full"
+                disabled={isNavigating}
+                className="neon-button w-full flex items-center justify-center space-x-2 disabled:opacity-50"
                 {...buttonHover}
               >
-                Go to Dashboard
+                {isNavigating && <LoadingSpinner size="sm" color="text-white" />}
+                <span>Go to Dashboard</span>
               </motion.button>
               <motion.button
                 onClick={handleLogout}
-                className="w-full bg-gray-700/50 text-gray-300 py-3 px-4 rounded-lg hover:bg-gray-600/50 transition-colors border border-gray-600/50"
+                disabled={isLoggingOut}
+                className="w-full bg-gray-700/50 text-gray-300 py-3 px-4 rounded-lg hover:bg-gray-600/50 transition-colors border border-gray-600/50 flex items-center justify-center space-x-2 disabled:opacity-50"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                Logout
+                {isLoggingOut && <LoadingSpinner size="sm" color="text-gray-300" />}
+                <span>Logout</span>
               </motion.button>
             </motion.div>
           </div>

@@ -1,50 +1,38 @@
-import jwt
-import requests
-from typing import Dict, Optional
+from authlib.integrations.fastapi_oauth2 import OAuth2Token
+from authlib.integrations.httpx_oauth2 import OAuth2Client
 import os
+from typing import Dict, Any
 
 class SSOService:
-    @staticmethod
-    def verify_google_token(token: str) -> Optional[Dict]:
-        try:
-            response = requests.get(f"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={token}")
-            if response.status_code == 200:
-                return response.json()
-        except:
-            pass
-        return None
+    def __init__(self):
+        self.google_client = OAuth2Client(
+            client_id=os.getenv("GOOGLE_CLIENT_ID"),
+            client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+            server_metadata_url="https://accounts.google.com/.well-known/openid_configuration"
+        )
+        
+        self.azure_client = OAuth2Client(
+            client_id=os.getenv("AZURE_CLIENT_ID"),
+            client_secret=os.getenv("AZURE_CLIENT_SECRET"),
+            server_metadata_url=f"https://login.microsoftonline.com/{os.getenv('AZURE_TENANT_ID')}/v2.0/.well-known/openid_configuration"
+        )
+        
+        self.okta_client = OAuth2Client(
+            client_id=os.getenv("OKTA_CLIENT_ID"),
+            client_secret=os.getenv("OKTA_CLIENT_SECRET"),
+            server_metadata_url=f"https://{os.getenv('OKTA_DOMAIN')}/.well-known/openid_configuration"
+        )
     
-    @staticmethod
-    def verify_azure_token(token: str, tenant_id: str) -> Optional[Dict]:
-        try:
-            # Decode JWT without verification for demo
-            decoded = jwt.decode(token, options={"verify_signature": False})
-            if decoded.get("tid") == tenant_id:
-                return decoded
-        except:
-            pass
-        return None
+    async def get_google_user_info(self, token: OAuth2Token) -> Dict[str, Any]:
+        resp = await self.google_client.get("https://www.googleapis.com/oauth2/v2/userinfo", token=token)
+        return resp.json()
     
-    @staticmethod
-    def verify_okta_token(token: str, domain: str) -> Optional[Dict]:
-        try:
-            response = requests.get(
-                f"https://{domain}.okta.com/oauth2/v1/introspect",
-                data={"token": token},
-                headers={"Authorization": f"Basic {os.getenv('OKTA_CLIENT_CREDENTIALS')}"}
-            )
-            if response.status_code == 200:
-                return response.json()
-        except:
-            pass
-        return None
+    async def get_azure_user_info(self, token: OAuth2Token) -> Dict[str, Any]:
+        resp = await self.azure_client.get("https://graph.microsoft.com/v1.0/me", token=token)
+        return resp.json()
     
-    @staticmethod
-    def authenticate_sso(provider: str, token: str, config: Dict) -> Optional[Dict]:
-        if provider == "google":
-            return SSOService.verify_google_token(token)
-        elif provider == "azure":
-            return SSOService.verify_azure_token(token, config.get("tenant_id"))
-        elif provider == "okta":
-            return SSOService.verify_okta_token(token, config.get("domain"))
-        return None
+    async def get_okta_user_info(self, token: OAuth2Token) -> Dict[str, Any]:
+        resp = await self.okta_client.get(f"https://{os.getenv('OKTA_DOMAIN')}/oauth2/v1/userinfo", token=token)
+        return resp.json()
+
+sso_service = SSOService()

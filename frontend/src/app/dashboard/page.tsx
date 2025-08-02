@@ -12,10 +12,8 @@ import RoleGuard from '../../components/auth/RoleGuard'
 import { useAuth } from '../../contexts/AuthContext'
 import toast, { Toaster } from 'react-hot-toast'
 import { UserRole } from '../../types/roles'
-import dynamic from 'next/dynamic'
-
-const Scene3D = dynamic(() => import('@/components/3d/Scene3D'), { ssr: false })
-const FloatingParticles = dynamic(() => import('@/components/3d/FloatingParticles'), { ssr: false })
+import { LazyFloatingParticles, LazyAdminTabs, LazyUserStats, useViewportOptimization } from '@/components/lazy/LazyComponents'
+import Scene3D from '@/components/3d/Scene3D'
 
 function DashboardContent() {
   const { user } = useAuth()
@@ -27,6 +25,7 @@ function DashboardContent() {
   const [vulnerabilities, setVulnerabilities] = useState(8)
   const [securityScore, setSecurityScore] = useState(85)
   const [aiAlerts, setAiAlerts] = useState(3)
+  const { shouldRender3D } = useViewportOptimization()
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -86,13 +85,13 @@ function DashboardContent() {
 
   return (
     <div className="min-h-screen pt-20 pb-12 px-4 sm:px-6 lg:px-8 relative">
-      <div className="fixed inset-0 pointer-events-none opacity-20">
-        <Suspense fallback={null}>
+      {shouldRender3D && (
+        <div className="fixed inset-0 pointer-events-none opacity-20">
           <Scene3D>
-            <FloatingParticles />
+            <LazyFloatingParticles />
           </Scene3D>
-        </Suspense>
-      </div>
+        </div>
+      )}
       <div className="max-w-7xl mx-auto relative z-10">
         <motion.div
           initial={{ opacity: 0, y: -20 }}

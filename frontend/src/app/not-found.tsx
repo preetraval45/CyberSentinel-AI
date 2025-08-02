@@ -1,195 +1,104 @@
 'use client'
 
+import { useState } from 'react'
 import { motion } from 'framer-motion'
-import Link from 'next/link'
-import { Shield, Home, ArrowLeft, Zap } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { slideUp, buttonHover } from '@/lib/animations'
+import PageTransition from '@/components/ui/PageTransition'
+import FeedbackAnimation from '@/components/animations/FeedbackAnimation'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
 export default function NotFound() {
-  const [glitchText, setGlitchText] = useState('404')
+  const router = useRouter()
+  const [isGoingBack, setIsGoingBack] = useState(false)
+  const [isNavigating, setIsNavigating] = useState(false)
 
-  useEffect(() => {
-    const glitchChars = ['4', '0', '4', '█', '▓', '▒', '░', '◆', '◇', '◈']
-    const interval = setInterval(() => {
-      const randomText = Array.from({ length: 3 }, () => 
-        glitchChars[Math.floor(Math.random() * glitchChars.length)]
-      ).join('')
-      setGlitchText(randomText)
-      
-      setTimeout(() => setGlitchText('404'), 100)
-    }, 2000)
+  const handleGoBack = async () => {
+    setIsGoingBack(true)
+    try {
+      router.back()
+    } finally {
+      setTimeout(() => setIsGoingBack(false), 1000)
+    }
+  }
 
-    return () => clearInterval(interval)
-  }, [])
+  const handleGoToDashboard = async () => {
+    setIsNavigating(true)
+    try {
+      router.push('/dashboard')
+    } finally {
+      setTimeout(() => setIsNavigating(false), 1000)
+    }
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 cyber-grid opacity-10" />
-      <div className="absolute inset-0">
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 bg-cyber-primary/20"
-            style={{
-              left: `${Math.random() * 100}%`,
-              height: '100%',
-            }}
-            animate={{
-              opacity: [0, 1, 0],
-              scaleY: [0, 1, 0],
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              delay: Math.random() * 2,
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="relative z-10 text-center max-w-2xl mx-auto">
-        {/* AI Sentinel Bot */}
-        <motion.div
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ duration: 1, type: "spring" }}
-          className="mb-8"
+    <PageTransition>
+      <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
+        <div className="absolute inset-0 dark-grid opacity-20" />
+        
+        <motion.div 
+          className="relative z-10 text-center max-w-md w-full"
+          variants={slideUp}
+          initial="initial"
+          animate="animate"
+          transition={{ duration: 0.6, ease: 'easeOut' }}
         >
-          <div className="relative mx-auto w-32 h-32">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-0 border-4 border-cyber-primary/30 rounded-full"
+          <div className="glass-card p-8">
+            <FeedbackAnimation
+              type="error"
+              show={true}
+              size="xl"
+              message="Page Not Found"
             />
-            <motion.div
-              animate={{ rotate: -360 }}
-              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-2 border-2 border-cyber-secondary/50 rounded-full"
-            />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Shield className="w-16 h-16 text-cyber-primary" />
-            </div>
-            <motion.div
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="absolute -inset-4 border border-cyber-primary/20 rounded-full"
-            />
-          </div>
-        </motion.div>
-
-        {/* Glitch Error Code */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="mb-8"
-        >
-          <div className="relative">
-            <h1 className="text-8xl md:text-9xl font-cyber font-black neon-text mb-4 relative">
-              {glitchText}
-              <motion.div
-                className="absolute inset-0 text-cyber-red"
-                animate={{
-                  x: [0, -2, 2, 0],
-                  opacity: [0, 1, 0],
-                }}
-                transition={{
-                  duration: 0.2,
-                  repeat: Infinity,
-                  repeatDelay: 3,
-                }}
-              >
-                {glitchText}
-              </motion.div>
-              <motion.div
-                className="absolute inset-0 text-cyber-secondary"
-                animate={{
-                  x: [0, 2, -2, 0],
-                  opacity: [0, 1, 0],
-                }}
-                transition={{
-                  duration: 0.2,
-                  repeat: Infinity,
-                  repeatDelay: 3,
-                  delay: 0.1,
-                }}
-              >
-                {glitchText}
-              </motion.div>
-            </h1>
-          </div>
-          
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: "100%" }}
-            transition={{ delay: 1, duration: 1 }}
-            className="h-1 bg-gradient-to-r from-cyber-primary via-cyber-secondary to-cyber-accent mx-auto mb-6"
-          />
-        </motion.div>
-
-        {/* Error Message */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5 }}
-          className="mb-12"
-        >
-          <h2 className="text-2xl md:text-3xl font-cyber font-bold text-cyber-primary mb-4">
-            SECURITY BREACH DETECTED
-          </h2>
-          <p className="text-cyber-primary/70 text-lg mb-2">
-            The requested resource has been quarantined by our AI Sentinel.
-          </p>
-          <p className="text-cyber-primary/50 font-mono text-sm">
-            ERROR_CODE: PAGE_NOT_FOUND | TIMESTAMP: {new Date().toISOString()}
-          </p>
-        </motion.div>
-
-        {/* Action Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 2 }}
-          className="flex flex-col sm:flex-row gap-4 justify-center items-center"
-        >
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Link
-              href="/"
-              className="cyber-button flex items-center space-x-2 px-8 py-4"
+            
+            <motion.h1 
+              className="text-6xl font-bold glow-text mb-4 mt-6"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
             >
-              <Home className="w-5 h-5" />
-              <span>RETURN TO BASE</span>
-            </Link>
-          </motion.div>
-          
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <button
-              onClick={() => window.history.back()}
-              className="cyber-button flex items-center space-x-2 px-8 py-4 border-cyber-secondary text-cyber-secondary hover:bg-cyber-secondary hover:text-cyber-dark"
+              404
+            </motion.h1>
+            
+            <motion.p 
+              className="text-gray-400 mb-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.4 }}
             >
-              <ArrowLeft className="w-5 h-5" />
-              <span>GO BACK</span>
-            </button>
-          </motion.div>
-        </motion.div>
-
-        {/* Security Status */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 2.5 }}
-          className="mt-12 glass-dark p-6 rounded-lg border border-cyber-primary/20"
-        >
-          <div className="flex items-center justify-center space-x-4 mb-4">
-            <Zap className="w-6 h-6 text-cyber-green animate-pulse" />
-            <span className="font-cyber font-bold text-cyber-green">SYSTEM SECURE</span>
+              The page you're looking for doesn't exist or has been moved.
+            </motion.p>
+            
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.4 }}
+            >
+              <motion.button
+                onClick={handleGoBack}
+                disabled={isGoingBack}
+                className="neon-button w-full flex items-center justify-center space-x-2 disabled:opacity-50"
+                {...buttonHover}
+              >
+                {isGoingBack && <LoadingSpinner size="sm" color="text-white" />}
+                <span>Go Back</span>
+              </motion.button>
+              
+              <motion.button
+                onClick={handleGoToDashboard}
+                disabled={isNavigating}
+                className="w-full bg-gray-700/50 text-gray-300 py-3 px-4 rounded-lg hover:bg-gray-600/50 transition-colors border border-gray-600/50 flex items-center justify-center space-x-2 disabled:opacity-50"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                {isNavigating && <LoadingSpinner size="sm" color="text-gray-300" />}
+                <span>Go to Dashboard</span>
+              </motion.button>
+            </motion.div>
           </div>
-          <p className="text-cyber-primary/60 text-sm">
-            All security protocols are active. Your session remains protected.
-          </p>
         </motion.div>
       </div>
-    </div>
+    </PageTransition>
   )
 }
