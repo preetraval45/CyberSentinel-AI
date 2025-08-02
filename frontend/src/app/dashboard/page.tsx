@@ -4,14 +4,21 @@ import { motion } from 'framer-motion'
 import { Player } from '@lottiefiles/react-lottie-player'
 import { Shield, AlertTriangle, TrendingUp, Brain, Activity, Zap, Eye, Lock } from 'lucide-react'
 import { fadeInUp, staggerContainer, glowHover, cyberPulse } from '../../lib/utils'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import RoleBasedDashboard from '../../components/dashboard/RoleBasedDashboard'
 import ProgressTracker from '../../components/gamification/ProgressTracker'
 import RoleSelector from '../../components/auth/RoleSelector'
+import RoleGuard from '../../components/auth/RoleGuard'
+import { useAuth } from '../../contexts/AuthContext'
 import toast, { Toaster } from 'react-hot-toast'
 import { UserRole } from '../../types/roles'
+import dynamic from 'next/dynamic'
 
-export default function Dashboard() {
+const Scene3D = dynamic(() => import('@/components/3d/Scene3D'), { ssr: false })
+const FloatingParticles = dynamic(() => import('@/components/3d/FloatingParticles'), { ssr: false })
+
+function DashboardContent() {
+  const { user } = useAuth()
   const [userRole, setUserRole] = useState<UserRole>('admin')
   const [tenantId] = useState('CORP-001')
   const [companyName] = useState('TechCorp Industries')
@@ -78,8 +85,15 @@ export default function Dashboard() {
   ]
 
   return (
-    <div className="min-h-screen pt-20 pb-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen pt-20 pb-12 px-4 sm:px-6 lg:px-8 relative">
+      <div className="fixed inset-0 pointer-events-none opacity-20">
+        <Suspense fallback={null}>
+          <Scene3D>
+            <FloatingParticles />
+          </Scene3D>
+        </Suspense>
+      </div>
+      <div className="max-w-7xl mx-auto relative z-10">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -253,6 +267,51 @@ export default function Dashboard() {
           </motion.div>
         </div>
 
+        {/* Role-based content sections */}
+        <RoleGuard requiredRole="SuperAdmin">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-8 cyber-card"
+          >
+            <h2 className="text-2xl font-cyber font-bold neon-text mb-4">SUPERADMIN CONTROLS</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="glass-dark p-4 rounded border border-cyber-red/30">
+                <h3 className="text-cyber-red font-bold">System Override</h3>
+                <p className="text-cyber-primary/70 text-sm">Full system control</p>
+              </div>
+              <div className="glass-dark p-4 rounded border border-cyber-accent/30">
+                <h3 className="text-cyber-accent font-bold">User Management</h3>
+                <p className="text-cyber-primary/70 text-sm">Manage all users</p>
+              </div>
+              <div className="glass-dark p-4 rounded border border-cyber-green/30">
+                <h3 className="text-cyber-green font-bold">Global Settings</h3>
+                <p className="text-cyber-primary/70 text-sm">Configure system</p>
+              </div>
+            </div>
+          </motion.div>
+        </RoleGuard>
+
+        <RoleGuard requiredRole="User">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-8 cyber-card"
+          >
+            <h2 className="text-2xl font-cyber font-bold neon-text mb-4">USER TOOLS</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="glass-dark p-4 rounded border border-cyber-primary/30">
+                <h3 className="text-cyber-primary font-bold">Security Analysis</h3>
+                <p className="text-cyber-primary/70 text-sm">Advanced security tools</p>
+              </div>
+              <div className="glass-dark p-4 rounded border border-cyber-secondary/30">
+                <h3 className="text-cyber-secondary font-bold">Reports</h3>
+                <p className="text-cyber-primary/70 text-sm">Generate detailed reports</p>
+              </div>
+            </div>
+          </motion.div>
+        </RoleGuard>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-12">
           {/* Role-Based Dashboard */}
           <motion.div
@@ -317,4 +376,8 @@ export default function Dashboard() {
       </div>
     </div>
   )
+}
+
+export default function Dashboard() {
+  return <DashboardContent />
 }

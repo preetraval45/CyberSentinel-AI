@@ -5,68 +5,48 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-gray-700;
   }
   body {
-    @apply bg-cyber-darker text-cyber-primary font-mono;
+    @apply bg-gray-900 text-gray-100 font-sans;
     background-image: 
-      radial-gradient(circle at 20% 80%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 40% 40%, rgba(255, 255, 0, 0.05) 0%, transparent 50%);
+      radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(147, 51, 234, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
   }
 }
 
 @layer components {
-  .glass {
-    @apply bg-glass-light backdrop-blur-md border border-white/10;
+  .glass-card {
+    @apply bg-gray-800/30 backdrop-blur-md border border-gray-700/50 rounded-xl;
   }
   
-  .glass-dark {
-    @apply bg-glass-dark backdrop-blur-md border border-white/5;
+  .glass-input {
+    @apply bg-gray-800/50 backdrop-blur-sm border border-gray-600/50 rounded-lg px-4 py-3 text-gray-100 placeholder-gray-400 focus:border-blue-500/70 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all duration-200;
   }
   
-  .cyber-border {
-    @apply border border-cyber-primary/30 shadow-[0_0_10px_rgba(0,255,255,0.3)];
+  .neon-button {
+    @apply bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:from-blue-500 hover:to-purple-500 hover:shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:ring-2 focus:ring-blue-500/50 active:scale-95;
   }
   
-  .cyber-glow {
-    @apply shadow-[0_0_20px_rgba(0,255,255,0.5)];
+  .neon-border {
+    @apply border border-blue-500/30 hover:border-blue-400/50 transition-colors duration-200;
   }
   
-  .cyber-button {
-    @apply bg-transparent border-2 border-cyber-primary text-cyber-primary px-6 py-3 font-cyber font-bold uppercase tracking-wider transition-all duration-300 hover:bg-cyber-primary hover:text-cyber-dark hover:shadow-[0_0_30px_rgba(0,255,255,0.8)] active:scale-95;
+  .dark-card {
+    @apply bg-gray-800/40 backdrop-blur-lg border border-gray-700/30 rounded-xl p-6 hover:bg-gray-800/50 transition-all duration-300;
   }
   
-  .cyber-card {
-    @apply glass-dark rounded-lg p-6 cyber-border hover:border-cyber-primary/50 transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,255,255,0.2)];
-  }
-  
-  .cyber-input {
-    @apply bg-transparent border-2 border-cyber-primary/30 text-cyber-primary placeholder-cyber-primary/50 px-4 py-3 rounded-lg focus:border-cyber-primary focus:outline-none focus:shadow-[0_0_20px_rgba(0,255,255,0.3)] transition-all duration-300;
-  }
-  
-  .cyber-grid {
+  .dark-grid {
     background-image: 
-      linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
-    background-size: 50px 50px;
+      linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+    background-size: 40px 40px;
   }
   
-  .neon-text {
-    @apply text-cyber-primary;
-    text-shadow: 
-      0 0 5px currentColor,
-      0 0 10px currentColor,
-      0 0 20px currentColor;
-  }
-  
-  .loading-dots {
-    @apply inline-flex space-x-1;
-  }
-  
-  .loading-dots span {
-    @apply w-2 h-2 bg-cyber-primary rounded-full animate-pulse;
-    animation-delay: calc(var(--i) * 0.2s);
+  .glow-text {
+    @apply text-blue-400;
+    text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
   }
 }
 

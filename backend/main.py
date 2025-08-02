@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import auth, threats, ai, vulnerabilities, phishing, chat, simulation, training, admin, ai_workflow, voice_calls, ransomware, team_simulation, red_blue_team, user_profile, behavior_analysis, sentinelbot, billing, sso, docs, notifications
+from routes import auth, threats, ai, vulnerabilities, phishing, chat, simulation, training, admin, ai_workflow, voice_calls, ransomware, team_simulation, red_blue_team, user_profile, behavior_analysis, sentinelbot, billing, sso, docs, notifications, protected_examples
 from config.database import engine, Base
 from middleware.security import SecurityHeadersMiddleware, InputSanitizationMiddleware, RateLimitMiddleware
 import time
@@ -22,7 +22,7 @@ app.add_middleware(RateLimitMiddleware, calls=100, period=60)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://cybersentinel.local", "https://cybersentinel.ai"],
+    allow_origins=["http://localhost:3000", "https://cybersentinel.local", "https://cybersentinel.ai"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["Authorization", "Content-Type"],
@@ -49,6 +49,7 @@ app.include_router(billing.router)
 app.include_router(sso.router)
 app.include_router(docs.router)
 app.include_router(notifications.router)
+app.include_router(protected_examples.router, prefix="/api/protected", tags=["protected"])
 
 @app.get("/health")
 def health_check():

@@ -9,8 +9,7 @@ alembic==1.12.1
 pydantic==2.5.0  # Specified version may not install due to Rust compilation requirements, newer version installed instead
 pydantic[email]==2.5.0
 python-jose[cryptography]==3.3.0
-# passlib[bcrypt]==1.7.4  # Actually installed (different extras than specified)
-passlib[argon2]==1.7.4  # Specified version with argon2 extras, but bcrypt extras also work
+passlib[argon2]==1.7.4
 argon2-cffi==23.1.0
 python-multipart==0.0.6
 redis==5.0.1

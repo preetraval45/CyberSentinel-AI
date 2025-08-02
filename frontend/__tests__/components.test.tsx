@@ -3,6 +3,7 @@ import '@testing-library/jest-dom';
 import Login from '../src/app/login/page';
 import Register from '../src/app/register/page';
 import AdminDashboard from '../src/app/admin/page';
+import { AuthProvider } from './path/to/AuthProvider'; // Adjust the import path as needed
 
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
@@ -23,14 +24,22 @@ describe('Authentication Components', () => {
 
   describe('Login Component', () => {
     it('renders login form', () => {
-      render(<Login />);
+      render(
+        <AuthProvider>
+          <Login />
+        </AuthProvider>
+      );
       expect(screen.getByText('Sign in to CyberSentinel AI')).toBeInTheDocument();
       expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
     });
 
     it('validates email input', async () => {
-      render(<Login />);
+      render(
+        <AuthProvider>
+          <Login />
+        </AuthProvider>
+      );
       const emailInput = screen.getByLabelText(/email/i);
       const submitButton = screen.getByRole('button', { name: /sign in/i });
 
@@ -43,7 +52,11 @@ describe('Authentication Components', () => {
     });
 
     it('sanitizes input values', async () => {
-      render(<Login />);
+      render(
+        <AuthProvider>
+          <Login />
+        </AuthProvider>
+      );
       const emailInput = screen.getByLabelText(/email/i);
       
       fireEvent.change(emailInput, { target: { value: '<script>alert("xss")</script>test@example.com' } });
@@ -61,7 +74,11 @@ describe('Authentication Components', () => {
         })
       });
 
-      render(<Login />);
+      render(
+        <AuthProvider>
+          <Login />
+        </AuthProvider>
+      );
       const emailInput = screen.getByLabelText(/email/i);
       const passwordInput = screen.getByLabelText(/password/i);
       const submitButton = screen.getByRole('button', { name: /sign in/i });
@@ -85,7 +102,11 @@ describe('Authentication Components', () => {
 
   describe('Register Component', () => {
     it('renders registration form', () => {
-      render(<Register />);
+      render(
+        <AuthProvider>
+          <Register />
+        </AuthProvider>
+      );
       expect(screen.getByText('Create your account')).toBeInTheDocument();
       expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/^password/i)).toBeInTheDocument();
@@ -93,7 +114,11 @@ describe('Authentication Components', () => {
     });
 
     it('validates password strength', async () => {
-      render(<Register />);
+      render(
+        <AuthProvider>
+          <Register />
+        </AuthProvider>
+      );
       const passwordInput = screen.getByLabelText(/^password/i);
       
       fireEvent.change(passwordInput, { target: { value: 'weak' } });
@@ -105,7 +130,11 @@ describe('Authentication Components', () => {
     });
 
     it('validates password confirmation', async () => {
-      render(<Register />);
+      render(
+        <AuthProvider>
+          <Register />
+        </AuthProvider>
+      );
       const passwordInput = screen.getByLabelText(/^password/i);
       const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
       

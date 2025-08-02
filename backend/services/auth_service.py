@@ -26,7 +26,7 @@ class AuthService:
         return user
 
     def create_tokens(self, user: User):
-        access_token = create_access_token(data={"sub": user.email})
+        access_token = create_access_token(data={"sub": user.email, "role": user.role.value})
         refresh_token = create_refresh_token()
         
         # Store refresh token
@@ -50,7 +50,7 @@ class AuthService:
         if not user:
             raise HTTPException(status_code=401, detail="User not found")
         
-        access_token = create_access_token(data={"sub": user.email})
+        access_token = create_access_token(data={"sub": user.email, "role": user.role.value})
         return {"access_token": access_token}
 
     def revoke_refresh_token(self, refresh_token: str):
