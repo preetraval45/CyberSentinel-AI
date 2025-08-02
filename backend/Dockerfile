@@ -1,23 +1,34 @@
 # Multi-stage build for production optimization
-FROM python:3.11.8-slim-bullseye AS builder
+FROM python:3.12-slim-bookworm AS builder
 
 WORKDIR /app
 
-# Upgrade system packages and install dependencies
-RUN apt-get update && apt-get dist-upgrade -y && apt-get install -y gcc && rm -rf /var/lib/apt/lists/*
+# Install system dependencies and upgrade packages
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+        gcc \
+        && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
 
 # Production stage
-FROM python:3.11.8-slim-bullseye AS production
+FROM python:3.12-slim-bookworm AS production
 
 WORKDIR /app
 
-# Upgrade system packages and create non-root user
-RUN apt-get update && apt-get dist-upgrade -y && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/* && \
-    groupadd -r appuser && useradd -r -g appuser appuser
+# Install minimal system dependencies and create non-root user
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        && \
+    rm -rf /var/lib/apt/lists/* && \
+    groupadd -r appuser && \
+    useradd -r -g appuser appuser
 
 # Copy Python packages from builder
 COPY --from=builder /root/.local /home/appuser/.local
