@@ -6,6 +6,7 @@ import { AlertTriangle, Shield, Zap, Target, TrendingUp, Clock } from 'lucide-re
 import toast, { Toaster } from 'react-hot-toast'
 import confetti from 'canvas-confetti'
 import { phishingAPI } from '../../lib/phishing-api'
+import SimulationPreview from '../ai/SimulationPreview'
 
 interface Email {
   id: string
@@ -37,6 +38,24 @@ interface Alert {
   created_at: string
 }
 
+interface SimulationData {
+  psychological_triggers: string[]
+  scoring: {
+    base_click_likelihood: number
+    success_points: number
+    failure_penalty: number
+  }
+  learning_objectives: string[]
+  attack_vector: string
+  difficulty_level: number
+  email?: {
+    subject: string
+    sender: string
+    sender_name: string
+    content: string
+  }
+}
+
 export default function GameifiedPhishingInbox() {
   const [emails, setEmails] = useState<Email[]>([])
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null)
@@ -50,6 +69,7 @@ export default function GameifiedPhishingInbox() {
   })
   const [alerts, setAlerts] = useState<Alert[]>([])
   const [startTime, setStartTime] = useState<number>(Date.now())
+  const [lastSimulationData, setLastSimulationData] = useState<SimulationData | null>(null)
 
   useEffect(() => {
     fetchGameSession()
@@ -97,10 +117,24 @@ export default function GameifiedPhishingInbox() {
         setStartTime(Date.now())
       }
       
-      // Show personalization info
-      if (newEmail.personalization) {
-        const triggers = newEmail.personalization.psychological_triggers.join(', ')
-        toast.success(`🎯 Personalized attack generated! Triggers: ${triggers}`)
+      // Store AI simulation data
+      if (newEmail.psychological_triggers) {
+        setLastSimulationData({
+          psychological_triggers: newEmail.psychological_triggers,
+          scoring: newEmail.scoring,
+          learning_objectives: newEmail.learning_objectives || [],
+          attack_vector: newEmail.type,
+          difficulty_level: parseInt(newEmail.difficulty_level),
+          email: {
+            subject: newEmail.subject,
+            sender: newEmail.sender,
+            sender_name: newEmail.sender_name || newEmail.sender,
+            content: newEmail.content
+          }
+        })
+        
+        const triggers = newEmail.psychological_triggers.join(', ')
+        toast.success(`🎯 AI-generated attack! Triggers: ${triggers}`)
       }
     } catch (error) {
       console.error('Failed to generate email:', error)
@@ -259,6 +293,13 @@ export default function GameifiedPhishingInbox() {
             </div>
           </div>
         </motion.div>
+
+        {/* AI Simulation Preview */}
+        {lastSimulationData && (
+          <div className="mb-8">
+            <SimulationPreview data={lastSimulationData} />
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Email List */}

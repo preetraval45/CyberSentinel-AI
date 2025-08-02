@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from config.database import get_db
 from services.red_blue_service import RedBlueService
+from services.ai_simulation_service import AISimulationService
 from middleware.auth_middleware import get_current_user
 from models.user import User
 
@@ -67,6 +68,18 @@ def start_competition(
         raise HTTPException(status_code=404, detail="Competition not found")
     
     return {"status": competition.status, "round_end_time": competition.round_end_time}
+
+@router.get("/challenge/{team}/{round_number}")
+def get_ai_challenge(
+    team: str,
+    round_number: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    ai_service = AISimulationService()
+    challenge_data = ai_service.generate_red_blue_challenge(team, round_number)
+    
+    return challenge_data
 
 @router.post("/competition/{competition_id}/action")
 def submit_action(

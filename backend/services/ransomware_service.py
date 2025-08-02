@@ -32,6 +32,20 @@ class RansomwareService:
         }
         return scenarios.get(scenario_type, scenarios["crypto_locker"])
 
+    def create_simulation_from_ai(self, user_id: str, scenario_type: str, difficulty_level: int, ai_data: dict):
+        simulation = RansomwareSimulation(
+            user_id=user_id,
+            scenario_type=scenario_type,
+            difficulty_level=difficulty_level,
+            total_steps=len(ai_data["response_steps"]),
+            steps_completed=[]
+        )
+        
+        self.db.add(simulation)
+        self.db.commit()
+        self.db.refresh(simulation)
+        return simulation
+
     def create_simulation(self, user_id: str, scenario_type: str, difficulty_level: int = 1):
         steps = self.get_scenario_steps(scenario_type)
         

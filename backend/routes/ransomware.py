@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from config.database import get_db
 from services.ransomware_service import RansomwareService
+from services.ai_simulation_service import AISimulationService
 from middleware.auth_middleware import get_current_user
 from models.user import User
 
@@ -22,15 +23,26 @@ def create_simulation(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    # Generate AI-powered scenario
+    ai_service = AISimulationService()
+    scenario_data = ai_service.generate_ransomware_scenario(request.difficulty_level)
+    
     service = RansomwareService(db)
-    simulation = service.create_simulation(
+    simulation = service.create_simulation_from_ai(
         str(current_user.id),
         request.scenario_type,
-        request.difficulty_level
+        request.difficulty_level,
+        scenario_data
     )
     
-    state = service.get_simulation_state(str(simulation.id))
-    return state
+    return {
+        "id": str(simulation.id),
+        "scenario": scenario_data["scenario"],
+        "response_steps": scenario_data["response_steps"],
+        "scoring_criteria": scenario_data["scoring_criteria"],
+        "current_step": 0,
+        "total_steps": len(scenario_data["response_steps"])
+    }
 
 @router.post("/action/{simulation_id}")
 def execute_action(
