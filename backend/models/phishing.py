@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Text, Boolean, DateTime, ForeignKey, Integer
+from sqlalchemy import Column, String, Text, Boolean, DateTime, ForeignKey, Integer, Float
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.sql import func
 from config.database import Base
@@ -14,10 +14,38 @@ class PhishingEmail(Base):
     content = Column(Text, nullable=False)
     phishing_type = Column(String(50), nullable=False)
     difficulty_level = Column(String(20), nullable=False)
+    ai_click_likelihood = Column(Float, default=0.0)
     is_clicked = Column(Boolean, default=False)
     is_reported = Column(Boolean, default=False)
     clicked_at = Column(DateTime(timezone=True))
     reported_at = Column(DateTime(timezone=True))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class PhishingGameSession(Base):
+    __tablename__ = "phishing_game_sessions"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    difficulty_level = Column(Integer, default=1)
+    score = Column(Integer, default=0)
+    emails_processed = Column(Integer, default=0)
+    correct_identifications = Column(Integer, default=0)
+    false_positives = Column(Integer, default=0)
+    clicks_on_malicious = Column(Integer, default=0)
+    session_data = Column(JSONB)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    ended_at = Column(DateTime(timezone=True))
+
+class PhishingAlert(Base):
+    __tablename__ = "phishing_alerts"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    email_id = Column(UUID(as_uuid=True), ForeignKey('phishing_emails.id', ondelete='CASCADE'), nullable=False)
+    alert_type = Column(String(50), nullable=False)  # 'click', 'report', 'timeout'
+    response_time = Column(Float)  # seconds
+    feedback_message = Column(Text)
+    xp_awarded = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class ChatSession(Base):

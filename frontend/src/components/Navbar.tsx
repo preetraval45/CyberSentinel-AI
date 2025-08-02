@@ -11,14 +11,21 @@ export default function Navbar() {
   const navItems = [
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/profile', label: 'Profile' },
+    { href: '/personalization', label: 'Personalize' },
     { href: '/leaderboard', label: 'Leaderboard' },
+    { href: '/scenario-builder', label: 'Builder' },
     { href: '/cybermap', label: 'Cyber Map' },
     { href: '/threats', label: 'Threats' },
     { href: '/vulnerabilities', label: 'Vulnerabilities' },
     { href: '/phishing', label: 'Phishing' },
+    { href: '/voice-calls', label: 'Voice Calls' },
+    { href: '/ransomware', label: 'Ransomware' },
+    { href: '/team-simulation', label: 'Team Sim' },
+    { href: '/red-blue', label: 'Red vs Blue' },
     { href: '/chat', label: 'AI Chat' },
     { href: '/simulation', label: 'Simulation' },
     { href: '/training', label: 'Training' },
+    { href: '/settings', label: 'Settings' },
     { href: '/admin', label: 'Admin' }
   ]
 

@@ -1,0 +1,123 @@
+/* Gamification Styles */
+
+.cyber-card {
+  @apply bg-black/40 backdrop-blur-md border border-cyan-500/30 rounded-lg p-4;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.cyber-card:hover {
+  @apply border-cyan-500/50;
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+}
+
+.cyber-glow {
+  box-shadow: 0 0 40px rgba(0, 255, 255, 0.4);
+}
+
+.cyber-button-primary {
+  @apply bg-cyan-500/20 border border-cyan-500 text-cyan-400 px-4 py-2 rounded font-cyber font-bold;
+  transition: all 0.3s ease;
+}
+
+.cyber-button-primary:hover:not(:disabled) {
+  @apply bg-cyan-500/30 text-cyan-300;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+}
+
+.cyber-button-danger {
+  @apply bg-red-500/20 border border-red-500 text-red-400 px-4 py-2 rounded font-cyber font-bold;
+  transition: all 0.3s ease;
+}
+
+.cyber-button-danger:hover:not(:disabled) {
+  @apply bg-red-500/30 text-red-300;
+  box-shadow: 0 0 20px rgba(255, 0, 102, 0.3);
+}
+
+.neon-text {
+  text-shadow: 0 0 10px currentColor;
+}
+
+.glass-dark {
+  @apply bg-black/60 backdrop-blur-sm;
+}
+
+/* Difficulty Slider */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: linear-gradient(to right, #00ff66 0%, #00ff66 33%, #ffff00 33%, #ffff00 66%, #ff0066 66%, #ff0066 100%);
+  outline: none;
+  border-radius: 15px;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #00ffff;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #00ffff;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+/* Alert Animations */
+@keyframes alertPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.alert-pulse {
+  animation: alertPulse 2s infinite;
+}
+
+/* XP Counter Animation */
+@keyframes xpGain {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  50% { transform: translateY(-10px) scale(1.1); opacity: 1; }
+  100% { transform: translateY(-20px) scale(1); opacity: 0; }
+}
+
+.xp-animation {
+  animation: xpGain 1s ease-out forwards;
+}
+
+/* Likelihood Indicator */
+.likelihood-high {
+  @apply text-red-400;
+  text-shadow: 0 0 5px rgba(255, 0, 102, 0.5);
+}
+
+.likelihood-medium {
+  @apply text-yellow-400;
+  text-shadow: 0 0 5px rgba(255, 255, 0, 0.5);
+}
+
+.likelihood-low {
+  @apply text-green-400;
+  text-shadow: 0 0 5px rgba(0, 255, 102, 0.5);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .cyber-card {
+    @apply p-3;
+  }
+  
+  .cyber-button-primary,
+  .cyber-button-danger {
+    @apply px-3 py-2 text-sm;
+  }
+}
