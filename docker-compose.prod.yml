@@ -11,7 +11,6 @@ services:
   # Nginx Reverse Proxy
   nginx:
     image: ${REGISTRY:-ghcr.io}/${IMAGE_NAME:-cybersentinel-ai}/nginx:${IMAGE_TAG:-latest}
-    container_name: cybersentinel-nginx
     ports:
       - "80:80"
       - "443:443"
@@ -42,7 +41,6 @@ services:
   # Next.js Frontend
   frontend:
     image: ${REGISTRY:-ghcr.io}/${IMAGE_NAME:-cybersentinel-ai}/frontend:${IMAGE_TAG:-latest}
-    container_name: cybersentinel-frontend
     expose:
       - "3000"
     environment:
@@ -69,7 +67,6 @@ services:
   # FastAPI Backend
   backend:
     image: ${REGISTRY:-ghcr.io}/${IMAGE_NAME:-cybersentinel-ai}/backend:${IMAGE_TAG:-latest}
-    container_name: cybersentinel-backend
     expose:
       - "8000"
     environment:
@@ -100,7 +97,6 @@ services:
   # PostgreSQL Database
   database:
     image: ${REGISTRY:-ghcr.io}/${IMAGE_NAME:-cybersentinel-ai}/database:${IMAGE_TAG:-latest}
-    container_name: cybersentinel-database
     environment:
       - POSTGRES_DB=cybersentinel
       - POSTGRES_USER=postgres
@@ -133,7 +129,6 @@ services:
   # Redis Cache
   redis:
     image: redis:7-alpine
-    container_name: cybersentinel-redis
     command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
     volumes:
       - redis_data:/data
@@ -156,7 +151,6 @@ services:
   # Backup Service
   backup:
     image: postgres:15-alpine
-    container_name: cybersentinel-backup
     environment:
       - POSTGRES_DB=cybersentinel
       - POSTGRES_USER=postgres

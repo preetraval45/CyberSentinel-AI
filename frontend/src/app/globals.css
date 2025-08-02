@@ -1,3 +1,84 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-cyber-darker text-cyber-primary font-mono;
+    background-image: 
+      radial-gradient(circle at 20% 80%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(255, 255, 0, 0.05) 0%, transparent 50%);
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-glass-light backdrop-blur-md border border-white/10;
+  }
+  
+  .glass-dark {
+    @apply bg-glass-dark backdrop-blur-md border border-white/5;
+  }
+  
+  .cyber-border {
+    @apply border border-cyber-primary/30 shadow-[0_0_10px_rgba(0,255,255,0.3)];
+  }
+  
+  .cyber-glow {
+    @apply shadow-[0_0_20px_rgba(0,255,255,0.5)];
+  }
+  
+  .cyber-button {
+    @apply bg-transparent border-2 border-cyber-primary text-cyber-primary px-6 py-3 font-cyber font-bold uppercase tracking-wider transition-all duration-300 hover:bg-cyber-primary hover:text-cyber-dark hover:shadow-[0_0_30px_rgba(0,255,255,0.8)] active:scale-95;
+  }
+  
+  .cyber-card {
+    @apply glass-dark rounded-lg p-6 cyber-border hover:border-cyber-primary/50 transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,255,255,0.2)];
+  }
+  
+  .cyber-input {
+    @apply bg-transparent border-2 border-cyber-primary/30 text-cyber-primary placeholder-cyber-primary/50 px-4 py-3 rounded-lg focus:border-cyber-primary focus:outline-none focus:shadow-[0_0_20px_rgba(0,255,255,0.3)] transition-all duration-300;
+  }
+  
+  .cyber-grid {
+    background-image: 
+      linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+  
+  .neon-text {
+    @apply text-cyber-primary;
+    text-shadow: 
+      0 0 5px currentColor,
+      0 0 10px currentColor,
+      0 0 20px currentColor;
+  }
+  
+  .loading-dots {
+    @apply inline-flex space-x-1;
+  }
+  
+  .loading-dots span {
+    @apply w-2 h-2 bg-cyber-primary rounded-full animate-pulse;
+    animation-delay: calc(var(--i) * 0.2s);
+  }
+}
+
+@layer utilities {
+  .text-shadow-glow {
+    text-shadow: 0 0 10px currentColor;
+  }
+  
+  .border-glow {
+    box-shadow: 0 0 10px currentColor;
+  }
+  
+  .hover-lift {
+    @apply transition-transform duration-300 hover:-translate-y-2;
+  }
+}

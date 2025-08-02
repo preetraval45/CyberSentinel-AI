@@ -39,5 +39,5 @@ class ChatMessage(Base):
     session_id = Column(UUID(as_uuid=True), ForeignKey('chat_sessions.id', ondelete='CASCADE'), nullable=False)
     sender_type = Column(String(10), nullable=False)  # 'user' or 'ai'
     message = Column(Text, nullable=False)
-    metadata = Column(JSONB)
+    message_metadata = Column(JSONB)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

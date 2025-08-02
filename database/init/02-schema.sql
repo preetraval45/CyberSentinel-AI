@@ -106,3 +106,49 @@ CREATE INDEX idx_audit_created ON audit.logs(created_at);
 CREATE INDEX idx_user_roles_user ON user_roles(user_id);
 CREATE INDEX idx_user_sessions_user ON user_sessions(user_id);
 CREATE INDEX idx_user_sessions_active ON user_sessions(is_active) WHERE is_active = TRUE;
+
+-- Phishing emails table
+CREATE TABLE phishing_emails (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    subject VARCHAR(255) NOT NULL,
+    sender VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    phishing_type VARCHAR(50) NOT NULL,
+    difficulty_level VARCHAR(20) NOT NULL,
+    is_clicked BOOLEAN DEFAULT FALSE,
+    is_reported BOOLEAN DEFAULT FALSE,
+    clicked_at TIMESTAMP,
+    reported_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Chat sessions table
+CREATE TABLE chat_sessions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    scenario_type VARCHAR(50) NOT NULL,
+    status VARCHAR(20) DEFAULT 'active',
+    ai_persona VARCHAR(100) NOT NULL,
+    context JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ended_at TIMESTAMP
+);
+
+-- Chat messages table
+CREATE TABLE chat_messages (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    session_id UUID NOT NULL REFERENCES chat_sessions(id) ON DELETE CASCADE,
+    sender_type VARCHAR(10) NOT NULL, -- 'user' or 'ai'
+    message TEXT NOT NULL,
+    message_metadata JSONB, -- Changed from 'metadata' to avoid reserved keyword
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes for chat tables
+CREATE INDEX idx_phishing_emails_user ON phishing_emails(user_id);
+CREATE INDEX idx_phishing_emails_type ON phishing_emails(phishing_type);
+CREATE INDEX idx_chat_sessions_user ON chat_sessions(user_id);
+CREATE INDEX idx_chat_sessions_status ON chat_sessions(status);
+CREATE INDEX idx_chat_messages_session ON chat_messages(session_id);
+CREATE INDEX idx_chat_messages_created ON chat_messages(created_at);
