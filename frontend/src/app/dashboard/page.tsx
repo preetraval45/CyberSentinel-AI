@@ -7,11 +7,15 @@ import { fadeInUp, staggerContainer, glowHover, cyberPulse } from '../../lib/uti
 import { useState, useEffect } from 'react'
 import RoleBasedDashboard from '../../components/dashboard/RoleBasedDashboard'
 import ProgressTracker from '../../components/gamification/ProgressTracker'
+import RoleSelector from '../../components/auth/RoleSelector'
 import toast, { Toaster } from 'react-hot-toast'
+import { UserRole } from '../../types/roles'
 
 export default function Dashboard() {
-  const [userRole] = useState<'admin' | 'user' | 'trainer' | 'compliance'>('admin')
+  const [userRole, setUserRole] = useState<UserRole>('admin')
   const [tenantId] = useState('CORP-001')
+  const [companyName] = useState('TechCorp Industries')
+  const [showRoleSelector, setShowRoleSelector] = useState(false)
   const [threats, setThreats] = useState(12)
   const [vulnerabilities, setVulnerabilities] = useState(8)
   const [securityScore, setSecurityScore] = useState(85)
@@ -90,6 +94,41 @@ export default function Dashboard() {
           </div>
         </motion.div>
         
+        {/* Role Selector Toggle */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="mb-8 flex justify-center"
+        >
+          <button
+            onClick={() => setShowRoleSelector(!showRoleSelector)}
+            className="cyber-button text-sm px-6 py-2"
+          >
+            {showRoleSelector ? 'HIDE' : 'SWITCH'} ROLE
+          </button>
+        </motion.div>
+
+        {/* Role Selector */}
+        {showRoleSelector && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-12"
+          >
+            <div className="cyber-card">
+              <RoleSelector 
+                selectedRole={userRole} 
+                onRoleChange={(role) => {
+                  setUserRole(role)
+                  setShowRoleSelector(false)
+                  toast.success(`Switched to ${role} role`)
+                }}
+                availableRoles={['superadmin', 'admin', 'securitytrainer', 'analyst', 'employee']}
+              />
+            </div>
+          </motion.div>
+        )}
+
         {/* Stats Grid */}
         <motion.div 
           variants={staggerContainer}
@@ -222,7 +261,7 @@ export default function Dashboard() {
             transition={{ delay: 0.8 }}
             className="lg:col-span-2"
           >
-            <RoleBasedDashboard userRole={userRole} tenantId={tenantId} />
+            <RoleBasedDashboard userRole={userRole} tenantId={tenantId} companyName={companyName} />
           </motion.div>
 
           {/* Progress Tracker */}

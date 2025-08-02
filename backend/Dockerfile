@@ -1,5 +1,5 @@
 # Multi-stage build for production optimization
-FROM python:3.12-slim-bookworm AS builder
+FROM python:3.13-slim AS builder
 
 WORKDIR /app
 
@@ -16,11 +16,11 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
 
 # Production stage
-FROM python:3.12-slim-bookworm AS production
+FROM python:3.13-slim AS production
 
 WORKDIR /app
 
-# Install minimal system dependencies and create non-root user
+# Install minimal system dependencies, upgrade packages, and create non-root user
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \

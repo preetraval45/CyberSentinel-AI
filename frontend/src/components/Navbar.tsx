@@ -10,6 +10,9 @@ export default function Navbar() {
 
   const navItems = [
     { href: '/dashboard', label: 'Dashboard' },
+    { href: '/profile', label: 'Profile' },
+    { href: '/leaderboard', label: 'Leaderboard' },
+    { href: '/cybermap', label: 'Cyber Map' },
     { href: '/threats', label: 'Threats' },
     { href: '/vulnerabilities', label: 'Vulnerabilities' },
     { href: '/phishing', label: 'Phishing' },

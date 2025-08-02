@@ -1,188 +1,144 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Player } from '@lottiefiles/react-lottie-player'
-import { Shield, Eye, EyeOff, Lock, Mail, ArrowRight } from 'lucide-react'
-import { fadeInUp, glowHover } from '../../lib/utils'
+import { Shield, Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react'
+import { authenticateUser, generateToken, FAKE_USERS } from '../../types/auth'
+import toast from 'react-hot-toast'
 
-export default function Login() {
+export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    // Simulate login process
-    setTimeout(() => setIsLoading(false), 2000)
+
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
+    const user = authenticateUser(email, password)
+    if (user) {
+      const token = generateToken(user)
+      localStorage.setItem('auth_token', token)
+      localStorage.setItem('current_user', JSON.stringify(user))
+      toast.success(`Welcome back, ${user.name}!`)
+      window.location.href = '/dashboard'
+    } else {
+      toast.error('Invalid credentials. Use demo123 as password.')
+    }
+    
+    setIsLoading(false)
+  }
+
+  const handleDemoLogin = (userEmail: string) => {
+    setEmail(userEmail)
+    setPassword('demo123')
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center pt-20 pb-12 px-4 sm:px-6 lg:px-8">
-      <motion.div 
+    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
+      <div className="absolute inset-0 cyber-grid opacity-10" />
+      
+      <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8 }}
-        className="max-w-md w-full space-y-8"
+        className="relative z-10 w-full max-w-md"
       >
-        {/* Logo and Header */}
-        <motion.div 
-          variants={fadeInUp}
-          initial="initial"
-          animate="animate"
-          className="text-center"
-        >
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-            className="relative mx-auto w-20 h-20 mb-6"
-          >
-            <Shield className="w-full h-full text-cyber-primary" />
-            <div className="absolute inset-0 w-20 h-20 border border-cyber-primary rounded-full animate-ping opacity-20" />
-          </motion.div>
-          
-          <h2 className="text-4xl font-cyber font-black neon-text mb-2">
-            ACCESS TERMINAL
-          </h2>
-          <p className="text-cyber-primary/70 font-mono text-sm">
-            AUTHENTICATE TO CONTINUE
-          </p>
-        </motion.div>
+        <div className="cyber-card">
+          <div className="text-center mb-8">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              className="w-16 h-16 mx-auto mb-4 border-2 border-cyber-primary rounded-full flex items-center justify-center"
+            >
+              <Shield className="w-8 h-8 text-cyber-primary" />
+            </motion.div>
+            <h1 className="text-3xl font-cyber font-black neon-text mb-2">
+              CYBERSENTINEL LOGIN
+            </h1>
+            <p className="text-cyber-primary/70">Secure access to your security dashboard</p>
+          </div>
 
-        {/* Login Form */}
-        <motion.div
-          initial={{ opacity: 0, y: 60 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.8 }}
-          className="cyber-card"
-        >
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email Field */}
-            <div className="relative">
-              <label className="block text-sm font-cyber font-bold text-cyber-primary/70 mb-2 uppercase tracking-wider">
-                Email Address
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div>
+              <label className="flex items-center space-x-2 text-cyber-primary/70 text-sm mb-2">
+                <Mail className="w-4 h-4" />
+                <span>Email Address</span>
               </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-cyber-primary/50" />
-                <motion.input
-                  whileFocus={{ scale: 1.02 }}
-                  type="email"
-                  placeholder="user@cybersentinel.ai"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="cyber-input pl-12 w-full"
-                  required
-                />
-              </div>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="cyber-input w-full"
+                placeholder="Enter your email"
+                required
+              />
             </div>
 
-            {/* Password Field */}
-            <div className="relative">
-              <label className="block text-sm font-cyber font-bold text-cyber-primary/70 mb-2 uppercase tracking-wider">
-                Password
+            <div>
+              <label className="flex items-center space-x-2 text-cyber-primary/70 text-sm mb-2">
+                <Lock className="w-4 h-4" />
+                <span>Password</span>
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-cyber-primary/50" />
-                <motion.input
-                  whileFocus={{ scale: 1.02 }}
+                <input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter secure password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="cyber-input pl-12 pr-12 w-full"
+                  className="cyber-input w-full pr-12"
+                  placeholder="Enter your password"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-cyber-primary/50 hover:text-cyber-primary transition-colors"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-cyber-primary/50 hover:text-cyber-primary"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
-            {/* Submit Button */}
             <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={isLoading}
-              {...glowHover}
-              className="w-full cyber-button py-4 relative overflow-hidden group"
+              className="cyber-button w-full flex items-center justify-center space-x-2"
             >
-              <div className="flex items-center justify-center space-x-2">
-                {isLoading ? (
-                  <>
-                    <div className="loading-dots">
-                      <span style={{ '--i': 0 } as any} />
-                      <span style={{ '--i': 1 } as any} />
-                      <span style={{ '--i': 2 } as any} />
-                    </div>
-                    <span>AUTHENTICATING</span>
-                  </>
-                ) : (
-                  <>
-                    <span>INITIALIZE ACCESS</span>
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </>
-                )}
-              </div>
+              <LogIn className="w-4 h-4" />
+              <span>{isLoading ? 'AUTHENTICATING...' : 'LOGIN'}</span>
             </motion.button>
-
-            {/* Additional Options */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between text-sm">
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input type="checkbox" className="sr-only" />
-                  <div className="w-4 h-4 border-2 border-cyber-primary/30 rounded bg-transparent" />
-                  <span className="text-cyber-primary/70">Remember me</span>
-                </label>
-                <Link href="/forgot-password" className="text-cyber-primary/70 hover:text-cyber-primary transition-colors">
-                  Forgot password?
-                </Link>
-              </div>
-              
-              <div className="text-center pt-4 border-t border-cyber-primary/20">
-                <p className="text-cyber-primary/70 text-sm mb-2">New to CyberSentinel?</p>
-                <Link 
-                  href="/register" 
-                  className="text-cyber-secondary hover:text-cyber-secondary/80 font-cyber font-bold uppercase tracking-wider transition-colors"
-                >
-                  Create Account
-                </Link>
-              </div>
-            </div>
           </form>
-        </motion.div>
 
-        {/* Security Notice */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="text-center"
-        >
-          <div className="glass-dark rounded-lg p-4 border border-cyber-primary/20">
-            <div className="flex items-center justify-center space-x-2 mb-2">
-              <Lock className="w-4 h-4 text-cyber-green" />
-              <span className="text-cyber-green text-sm font-cyber font-bold">SECURE CONNECTION</span>
+          <div className="mt-8 pt-6 border-t border-cyber-primary/20">
+            <h3 className="font-cyber font-bold text-cyber-primary text-sm mb-4">DEMO ACCOUNTS</h3>
+            <div className="space-y-2">
+              {FAKE_USERS.slice(0, 3).map((user) => (
+                <motion.button
+                  key={user.id}
+                  whileHover={{ scale: 1.02 }}
+                  onClick={() => handleDemoLogin(user.email)}
+                  className="w-full text-left p-3 glass-dark rounded border border-cyber-primary/20 hover:border-cyber-primary/40 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-cyber font-bold text-cyber-primary text-sm">{user.name}</p>
+                      <p className="text-cyber-primary/70 text-xs">{user.role} • {user.email}</p>
+                    </div>
+                    <div className="text-cyber-accent font-cyber font-bold text-sm">
+                      {user.securityScore}
+                    </div>
+                  </div>
+                </motion.button>
+              ))}
             </div>
-            <p className="text-cyber-primary/50 text-xs font-mono">
-              256-bit encryption • Multi-factor authentication • Zero-trust architecture
+            <p className="text-cyber-primary/50 text-xs mt-4 text-center">
+              Password: demo123 for all accounts
             </p>
           </div>
-        </motion.div>
-
-        {/* Background Animation */}
-        <div className="fixed inset-0 pointer-events-none opacity-10 z-0">
-          <Player
-            autoplay
-            loop
-            src="https://lottie.host/cyber-background.json"
-            className="w-full h-full object-cover"
-          />
         </div>
       </motion.div>
     </div>
