@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -10,7 +11,8 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full space-y-8">
-        <div>
+        <div className="text-center">
+          <Image src="/logo.png" alt="CyberSentinel AI" width={80} height={80} className="mx-auto rounded-lg mb-4" />
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Sign in to CyberSentinel AI
           </h2>

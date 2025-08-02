@@ -32,6 +32,15 @@ CREATE TABLE security.threats (
     resolved_at TIMESTAMP
 );
 
+-- Refresh tokens table
+CREATE TABLE refresh_tokens (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token VARCHAR(255) UNIQUE NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- AI Memory table
 CREATE TABLE ai_memory.agent_state (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -53,6 +62,9 @@ CREATE TABLE audit.logs (
 );
 
 -- Indexes
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_refresh_tokens_user ON refresh_tokens(user_id);
+CREATE INDEX idx_refresh_tokens_expires ON refresh_tokens(expires_at);
 CREATE INDEX idx_threats_severity ON security.threats(severity);
 CREATE INDEX idx_threats_detected_at ON security.threats(detected_at);
 CREATE INDEX idx_agent_state_session ON ai_memory.agent_state(session_id);
